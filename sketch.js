@@ -333,7 +333,7 @@ function preload() {
   SPRITES.down.img = loadImage("assets/images/s_key_penguin.png");
   SPRITES.stomp.img = loadImage("assets/images/penguin_stomp.png");
   SPRITES.penguin_avalanche.img = loadImage("assets/images/penguin_avalanche.png");
-  startBg = loadImage("assets/images/Start Screen.png");
+  startBg = loadImage("assets/images/start_screen.png");
   winBg   = loadImage("assets/images/win_screen.png");
   lossBg  = loadImage("assets/images/loss_screen.png");
 
