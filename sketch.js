@@ -24,7 +24,6 @@ let level3Complete = true;
 // Start screen penguin animation
 let testFrame = 0;
 let testFrameTimer = 0;
-let titleImg;
 
 // Avalanche penguin animation
 let avalancheFrame = 0;
@@ -239,6 +238,7 @@ let tutorialBox;
 let warningOutline;
 let maskBuffer;
 let avalancheBuffer;
+let avalancheCard;
 let boxKey;
 let tutorialSteps = [
   {
@@ -325,7 +325,6 @@ function preload() {
   infoButtonImg = loadImage("assets/images/info_button.png");
   wideBoxImg = loadImage("assets/images/bigger_box.png");
   gameFont = loadFont("assets/fonts/jersey10.ttf");
-  titleImg = loadImage("assets/images/title_card.png");
   SPRITES.up.img = loadImage("assets/images/w_key_penguin.png");
   SPRITES.start_penguin.img = loadImage("assets/images/penguin_front.png");
   SPRITES.left.img = loadImage("assets/images/a_key_penguin.png");
@@ -333,11 +332,7 @@ function preload() {
   SPRITES.down.img = loadImage("assets/images/s_key_penguin.png");
   SPRITES.stomp.img = loadImage("assets/images/penguin_stomp.png");
   SPRITES.penguin_avalanche.img = loadImage("assets/images/penguin_avalanche.png");
-  startBg = loadImage(
-  "assets/images/start_screen.png",
-  img => console.log("✅ start_screen loaded:", img.width, img.height),
-  err => console.error("❌ FAILED to load start_screen.png", err)
-);
+  startBg = loadImage("assets/images/title_screen.png");
   winBg   = loadImage("assets/images/win_screen.png");
   lossBg  = loadImage("assets/images/loss_screen.png");
 
@@ -357,6 +352,7 @@ function preload() {
   starFilledImg  = loadImage("assets/images/golden_star.png");
 
   tutorialBox = loadImage("assets/images/tutorial_box.png");
+  avalancheCard = loadImage("assets/images/avalanche_card.png");
   warningOutline = loadImage("assets/images/warning_octo.png");
   boxKey = loadImage("assets/images/box_key.png");
 
@@ -818,6 +814,26 @@ function randomizeFishPosition() {
   fish.y = spot.y;
 }
 
+const START_BTN = { x: 430, y: 675, w: 330, h: 60 };
+
+function drawStartScreen() {
+  imageMode(CORNER);
+  image(startBg, 0, 0, width, height);
+
+  let hover = mouseX > START_BTN.x && mouseX < START_BTN.x + START_BTN.w &&
+              mouseY > START_BTN.y && mouseY < START_BTN.y + START_BTN.h;
+
+  if (hover) {
+    cursor(HAND);
+    noStroke();
+    fill(255, 255, 255, 40);
+    rect(START_BTN.x, START_BTN.y, START_BTN.w, START_BTN.h, 8);
+  } else {
+    cursor(ARROW);
+  }
+}
+
+
 function draw() {
   // START SCREEN
   if (gameState === "start") {
@@ -857,6 +873,7 @@ function draw() {
       drawLevel3();
       return;
   }
+
 
   // -------------------------
   // GAMEPLAY
@@ -1103,6 +1120,26 @@ function drawTutorialOverlay() {
   }
 
   let step = tutorialSteps[tutorialIndex];
+
+  if (tutorialIndex === 0) {
+  push();
+  imageMode(CENTER);
+
+  // Maintain the image's original aspect ratio
+  const cardW = min(950, width - 80);
+  const cardH = cardW * (avalancheCard.height / avalancheCard.width);
+
+  image(
+    avalancheCard,
+    width / 2,
+    height / 2 + 20,
+    cardW,
+    cardH
+  );
+
+  pop();
+  return;
+}
 
   // Format timer
   let rawText = step.text;
@@ -1907,15 +1944,13 @@ function mousePressed() {
     }
 
     /// --- START SCREEN BUTTON PRESS ---
-    if (gameState === "start") {
-      let bx = width/2, by = 400, bw = 320, bh = 64;
-
-      if (mouseX > bx-bw/2 && mouseX < bx+bw/2 &&
-          mouseY > by-bh/2 && mouseY < by+bh/2) {
-        startBtnPressed = true;
-      }
-      return;
-    }
+if (gameState === "start") {
+  if (mouseX > START_BTN.x && mouseX < START_BTN.x + START_BTN.w &&
+      mouseY > START_BTN.y && mouseY < START_BTN.y + START_BTN.h) {
+    startBtnPressed = true;
+  }
+  return;
+}
 
     // --- WIN SCREEN BUTTON ---
     if (gameState === "win") {
@@ -1991,19 +2026,16 @@ function mousePressed() {
 function mouseReleased() {
   // --- START SCREEN BUTTON RELEASE ---
   if (gameState === "start") {
-    let { bx, by, bw, bh } = getStartButtonRect();
+  let hover = mouseX > START_BTN.x && mouseX < START_BTN.x + START_BTN.w &&
+              mouseY > START_BTN.y && mouseY < START_BTN.y + START_BTN.h;
 
-    let hover =
-      mouseX > bx-bw/2 && mouseX < bx+bw/2 &&
-      mouseY > by-bh/2 && mouseY < by+bh/2;
-
-    if (startBtnPressed && hover) {
-      gameState = "level_picker";
-    }
-
-    startBtnPressed = false;
-    return;
+  if (startBtnPressed && hover) {
+    gameState = "level_picker";
   }
+
+  startBtnPressed = false;
+  return;
+}
 
   // --- TUTORIAL CONTINUE BUTTON RELEASE ---
   if (gameState === "tutorial") {
@@ -2090,11 +2122,6 @@ function mouseReleased() {
     winBtnPressed = false;
     return;
   }
-}
-
-function drawStartScreen() {
-  imageMode(CORNER);
-  image(startBg, 0, 0, width, height);
 }
 
 
