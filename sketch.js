@@ -333,7 +333,11 @@ function preload() {
   SPRITES.down.img = loadImage("assets/images/s_key_penguin.png");
   SPRITES.stomp.img = loadImage("assets/images/penguin_stomp.png");
   SPRITES.penguin_avalanche.img = loadImage("assets/images/penguin_avalanche.png");
-  startBg = loadImage("assets/images/Start_Screen.png");
+  startBg = loadImage(
+  "assets/images/start_screen.png",
+  img => console.log("✅ start_screen loaded:", img.width, img.height),
+  err => console.error("❌ FAILED to load start_screen.png", err)
+);
   winBg   = loadImage("assets/images/win_screen.png");
   lossBg  = loadImage("assets/images/loss_screen.png");
 
@@ -853,7 +857,6 @@ function draw() {
       drawLevel3();
       return;
   }
-
 
   // -------------------------
   // GAMEPLAY
@@ -2087,6 +2090,11 @@ function mouseReleased() {
     winBtnPressed = false;
     return;
   }
+}
+
+function drawStartScreen() {
+  imageMode(CORNER);
+  image(startBg, 0, 0, width, height);
 }
 
 
