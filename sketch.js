@@ -817,14 +817,9 @@ function randomizeFishPosition() {
 function draw() {
   // START SCREEN
   if (gameState === "start") {
-  let { bx, by, bw, bh } = getStartButtonRect();
-
-  if (mouseX > bx-bw/2 && mouseX < bx+bw/2 &&
-      mouseY > by-bh/2 && mouseY < by+bh/2) {
-    startBtnPressed = true;
+    drawStartScreen();
+    return;
   }
-  return;
-}
 
   // WIN SCREEN
   if (gameState === "win") {
@@ -1993,19 +1988,20 @@ function mousePressed() {
 function mouseReleased() {
   // --- START SCREEN BUTTON RELEASE ---
   if (gameState === "start") {
-  let { bx, by, bw, bh } = getStartButtonRect();
+    let { bx, by, bw, bh } = getStartButtonRect();
 
-  let hover =
-    mouseX > bx-bw/2 && mouseX < bx+bw/2 &&
-    mouseY > by-bh/2 && mouseY < by+bh/2;
+    let hover =
+      mouseX > bx-bw/2 && mouseX < bx+bw/2 &&
+      mouseY > by-bh/2 && mouseY < by+bh/2;
 
-  if (startBtnPressed && hover) {
-    gameState = "level_picker";
+    if (startBtnPressed && hover) {
+      gameState = "level_picker";
+    }
+
+    startBtnPressed = false;
+    return;
   }
 
-  startBtnPressed = false;
-  return;
-}
   // --- TUTORIAL CONTINUE BUTTON RELEASE ---
   if (gameState === "tutorial") {
     let bx = width/2, by = height * 0.60, bw = 320, bh = 64;
