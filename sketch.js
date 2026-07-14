@@ -333,7 +333,7 @@ function preload() {
   SPRITES.down.img = loadImage("assets/images/s_key_penguin.png");
   SPRITES.stomp.img = loadImage("assets/images/penguin_stomp.png");
   SPRITES.penguin_avalanche.img = loadImage("assets/images/penguin_avalanche.png");
-  startBg = loadImage("assets/images/start_screen.png");
+  startBg = loadImage("assets/images/Start_Screen.png");
   winBg   = loadImage("assets/images/win_screen.png");
   lossBg  = loadImage("assets/images/loss_screen.png");
 
@@ -817,9 +817,14 @@ function randomizeFishPosition() {
 function draw() {
   // START SCREEN
   if (gameState === "start") {
-    drawStartScreen();
-    return;
+  let { bx, by, bw, bh } = getStartButtonRect();
+
+  if (mouseX > bx-bw/2 && mouseX < bx+bw/2 &&
+      mouseY > by-bh/2 && mouseY < by+bh/2) {
+    startBtnPressed = true;
   }
+  return;
+}
 
   // WIN SCREEN
   if (gameState === "win") {
@@ -1988,20 +1993,19 @@ function mousePressed() {
 function mouseReleased() {
   // --- START SCREEN BUTTON RELEASE ---
   if (gameState === "start") {
-    let bx = width/2, by = 400, bw = 320, bh = 64;
+  let { bx, by, bw, bh } = getStartButtonRect();
 
-    let hover =
-      mouseX > bx-bw/2 && mouseX < bx+bw/2 &&
-      mouseY > by-bh/2 && mouseY < by+bh/2;
+  let hover =
+    mouseX > bx-bw/2 && mouseX < bx+bw/2 &&
+    mouseY > by-bh/2 && mouseY < by+bh/2;
 
-    if (startBtnPressed && hover) {
-      gameState = "level_picker";
-    }
-
-    startBtnPressed = false;
-    return;
+  if (startBtnPressed && hover) {
+    gameState = "level_picker";
   }
 
+  startBtnPressed = false;
+  return;
+}
   // --- TUTORIAL CONTINUE BUTTON RELEASE ---
   if (gameState === "tutorial") {
     let bx = width/2, by = height * 0.60, bw = 320, bh = 64;
