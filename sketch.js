@@ -228,6 +228,7 @@ let selectedSpikeVariant = 0;
 
 // Tutorial text
 let tutorialActive = false;
+let enterInstructionActive = true;
 let tutorialAlpha = 0;
 let tutorialIndex = 0;
 let tutorialDelay = 0;
@@ -235,47 +236,49 @@ let postTutorialTimerActive = false;
 let postTutorialTimer = 0;
 let postTutorialDelayFrames = 360; // 6 seconds
 let tutorialBox;
+let avalancheCard;
+let flashlightCard;
+let hurryCard;
+let instructionDirectionCard;
 let warningOutline;
 let maskBuffer;
 let avalancheBuffer;
-let avalancheCard;
 let boxKey;
 let tutorialSteps = [
   {
     text: "AVALANCHE\nWARNING\nIN {time} !",
-    //text
     fill: [247, 20, 43],
     size: 64,
-    // box
     boxFill: tutorialBox,
     delay: 60
   },
   {
     text: " ",
-    //text
     fill: [140, 180, 230],
     size: 42,
-    // box
     boxFill: tutorialBox,
     delay: 20
   },
   {
     text: "Use A, W, S, D\nto move around.",
-    //text
     fill: [140, 180, 230],
     size: 42,
-    // box
     boxFill: tutorialBox,
     delay: 20
   },
   {
     text: " ",
-    //text
     fill: [140, 180, 230],
     size: 42,
-    // box
     boxFill: tutorialBox,
-    delay: 450
+    delay: 20   // new flashlight card
+  },
+  {
+    text: " ",
+    fill: [140, 180, 230],
+    size: 42,
+    boxFill: tutorialBox,
+    delay: 450  // old final delayed card, now moved to index 4
   }
 ];
 
@@ -339,6 +342,10 @@ function preload() {
   levelPickerBg = loadImage("assets/images/level_picker.JPG");
   lock_icon = loadImage("assets/images/lock_icon.png");
   check_icon = loadImage("assets/images/check_icon.png");
+  hurryCard = loadImage("assets/images/hurry_card.png");
+  flashlightCard = loadImage("assets/images/flashlight_card.png");
+  instructionDirectionCard = loadImage("assets/images/instruction_directioncard.png");
+  avalancheCard = loadImage("assets/images/avalanche_card.png");
   info_box = loadImage("assets/images/level_info_box.png");
 
   // Fishy stuff
@@ -352,7 +359,6 @@ function preload() {
   starFilledImg  = loadImage("assets/images/golden_star.png");
 
   tutorialBox = loadImage("assets/images/tutorial_box.png");
-  avalancheCard = loadImage("assets/images/avalanche_card.png");
   warningOutline = loadImage("assets/images/warning_octo.png");
   boxKey = loadImage("assets/images/box_key.png");
 
@@ -1022,8 +1028,8 @@ function draw() {
       postTutorialTimerActive = false;
       tutorialActive = true;
       gameState = "tutorial";
-      tutorialIndex = 3;
-      tutorialDelay = tutorialSteps[3].delay;
+      tutorialIndex = 4;
+      tutorialDelay = tutorialSteps[4].delay;
     }
   }
 
@@ -1112,7 +1118,92 @@ function drawUpAnimation(x, y) {
   image(cfg.img, x, y, dw, dh, sx, sy, sw, sh);
 }
 
+function drawEnterInstruction() {
+  push();
+
+  rectMode(CENTER);
+  textFont(gameFont);
+  textStyle(BOLD);
+  textSize(28);
+
+  const y = height / 2 + 20;
+
+  const beforeText = "PRESS ";
+  const keyText = "ENTER";
+  const afterText = " TO CONTINUE";
+
+  const keyPadding = 14;
+  const beforeW = textWidth(beforeText);
+  const keyW = textWidth(keyText) + keyPadding * 2;
+  const afterW = textWidth(afterText);
+  const totalTextW = beforeW + keyW + afterW;
+
+  const panelW = totalTextW + 50;
+  const panelH = 70;
+
+  // only one solid rectangle, no shadow
+  noStroke();
+  fill(145, 150, 158);
+  rect(width / 2, y, panelW, panelH, 16);
+
+  let currentX = width / 2 - totalTextW / 2;
+
+  // PRESS
+  textAlign(LEFT, CENTER);
+  fill(255);
+  text(beforeText, currentX, y - 1);
+  currentX += beforeW;
+
+  // ENTER key box
+  rectMode(CORNER);
+  fill(245);
+  rect(currentX, y - 23, keyW, 46, 8);
+
+  fill(100, 110, 125);
+  textAlign(CENTER, CENTER);
+  text(keyText, currentX + keyW / 2, y - 1);
+
+  currentX += keyW;
+
+  // TO CONTINUE
+  fill(255);
+  textAlign(LEFT, CENTER);
+  text(afterText, currentX, y - 1);
+
+  pop();
+}
+
+function drawDialogueCard(cardImage) {
+  push();
+  imageMode(CENTER);
+
+  // Smaller dialogue-card size
+  const cardW = min(620, width - 300);
+  const cardH =
+    cardW * (cardImage.height / cardImage.width);
+
+  // Position near the bottom of the screen
+  const bottomMargin = -40;
+  const cardY = height - cardH / 2 - bottomMargin;
+
+  image(
+    cardImage,
+    width / 2,
+    cardY,
+    cardW,
+    cardH
+  );
+
+  pop();
+}
+
 function drawTutorialOverlay() {
+  // Show this before the avalanche warning
+  if (enterInstructionActive) {
+    drawEnterInstruction();
+    return;
+  }
+
   // Count down delay
   if (tutorialDelay > 0) {
     tutorialDelay--;
@@ -1121,16 +1212,52 @@ function drawTutorialOverlay() {
 
   let step = tutorialSteps[tutorialIndex];
 
-  if (tutorialIndex === 0) {
+// Avalanche warning dialogue
+if (tutorialIndex === 0) {
+  drawDialogueCard(avalancheCard);
+  return;
+}
+
+// Hurry dialogue
+if (tutorialIndex === 1) {
+  drawDialogueCard(hurryCard);
+  return;
+}
+
+// Direction controls card
+if (tutorialIndex === 2) {
   push();
   imageMode(CENTER);
 
-  // Maintain the image's original aspect ratio
-  const cardW = min(950, width - 80);
-  const cardH = cardW * (avalancheCard.height / avalancheCard.width);
+  const cardW = min(640, width - 280);
+  const cardH =
+    cardW *
+    (instructionDirectionCard.height /
+      instructionDirectionCard.width);
 
   image(
-    avalancheCard,
+    instructionDirectionCard,
+    width / 2,
+    height / 2 + 20,
+    cardW,
+    cardH
+  );
+
+  pop();
+  return;
+}
+
+if (tutorialIndex === 3) {
+  push();
+  imageMode(CENTER);
+
+  const cardW = min(640, width - 280);
+  const cardH =
+    cardW *
+    (flashlightCard.height / flashlightCard.width);
+
+  image(
+    flashlightCard,
     width / 2,
     height / 2 + 20,
     cardW,
@@ -1192,92 +1319,7 @@ function drawTutorialOverlay() {
     image(warningOutline, width/2 - 330, height/2 - 80, 200, 200);
   } 
 
-  else if (tutorialIndex === 1) {
-    textAlign(LEFT, TOP);
-    textSize(step.size);
-    stroke(10, 15, 54);
-    strokeWeight(8);
-
-    let leftX = width/2 - 150;
-    let baseY = height/2 - 40;
-    let lh = textAscent() + textDescent() + 10;
-
-    // Line 1 split
-    let before1    = "Hurry, find ";
-    let highlight1 = "Fishy";
-    let after1     = " and";
-
-    // Line 2
-    let line2      = "make your way down the";
-
-    // Line 3
-    let line3      = "mountain to shelter!";
-
-    // --- LINE 1 (before + highlight + after) ---
-    fill(step.fill[0], step.fill[1], step.fill[2]);
-    text(before1, leftX, baseY);
-
-    let beforeW = textWidth(before1);
-
-    fill(255); // white highlight
-    text(highlight1, leftX + beforeW, baseY);
-
-    let highlightW = textWidth(highlight1);
-
-    fill(step.fill[0], step.fill[1], step.fill[2]);
-    text(after1, leftX + beforeW + highlightW, baseY);
-
-    // --- LINE 2 ---
-    text(line2, leftX, baseY + lh-15);
-
-    // --- LINE 3 ---
-    text(line3, leftX, baseY + lh * 2 -30);
-
-    image(fishImg, 270, height/2 - 30, 150, 100);
-  }
-
-  else if (tutorialIndex === 2) {
-    textAlign(LEFT, CENTER);
-    let baseX = width/2 - 60;
-    let baseY = height/2;   // move up slightly
-    let lh = step.size * 0.72;   // tighter line height (64 * 0.72 ≈ 46px)
-
-    let parts = displayText.split("\n");
-
-    // Line 1
-    text(parts[0], baseX, baseY);
-
-    // Line 2
-    text(parts[1], baseX, baseY + lh);
-
-    fill(10, 15, 54)
-    strokeWeight(2);
-    textFont(gameFont);
-    textSize(24);
-    textAlign(CENTER);
-
-    // W key
-    rect(width/2-238, height/2-48, 60, 60, 4)
-    image(boxKey, width/2-250, height/2-60, 70, 70);
-    text("W", width/2 - 215, height/2 - 28);
-
-    // S key
-    rect(width/2-238, height/2+32, 60, 60, 4)
-    image(boxKey, width/2-250, height/2+20, 70, 70);
-    text("S", width/2 - 215, height/2 + 52);
-
-    // A key
-    rect(width/2-318, height/2+32, 60, 60, 4)
-    image(boxKey, width/2-330, height/2+20, 70, 70);
-    text("A", width/2 - 295, height/2 + 52);
-
-    // D key
-    rect(width/2-158, height/2+32, 60, 60, 4)
-    image(boxKey, width/2-170, height/2+20, 70, 70);
-    text("D", width/2 - 135, height/2 + 52);
-  }
-
-  else if (tutorialIndex === 3) {
+  else if (tutorialIndex === 4) {
     textAlign(LEFT, TOP);
     textSize(step.size);
     stroke(10, 15, 54);
@@ -1458,29 +1500,43 @@ function keyPressed() {
   }
 
   // TUTORIAL → ENTER → PLAYING
-  if (gameState === "tutorial" && keyCode === ENTER) {
-    // ignore ENTER until delay finishes
-    if (tutorialDelay > 0) return;
-    tutorialIndex++;
-    if (tutorialIndex === 3) {
-      tutorialActive = false;            // hide tutorial
-      gameState = "playing";             // allow movement
-      postTutorialTimerActive = true;    // start countdown
-      postTutorialTimer = 0;
-      cursor(ARROW);
-      return;
-    }
+if (gameState === "tutorial" && keyCode === ENTER) {
+  // First Enter: remove instruction and reveal avalanche card
+  if (enterInstructionActive) {
+    enterInstructionActive = false;
 
-    if (tutorialIndex < tutorialSteps.length) {
-      tutorialAlpha = 255;
-      tutorialDelay = tutorialSteps[tutorialIndex].delay;
-      return;
-    }
+    // Show the avalanche card immediately
+    tutorialDelay = 0;
 
-    tutorialActive = false;
-    gameState = "playing";
     return;
   }
+
+  // Ignore Enter while another tutorial delay is active
+  if (tutorialDelay > 0) return;
+
+  // Second Enter: acknowledge avalanche card
+  // Then preserve the existing tutorial flow
+  tutorialIndex++;
+
+ if (tutorialIndex === 4) {
+  tutorialActive = false;
+  gameState = "playing";
+  postTutorialTimerActive = true;
+  postTutorialTimer = 0;
+  cursor(ARROW);
+  return;
+}
+
+  if (tutorialIndex < tutorialSteps.length) {
+    tutorialAlpha = 255;
+    tutorialDelay = tutorialSteps[tutorialIndex].delay;
+    return;
+  }
+
+  tutorialActive = false;
+  gameState = "playing";
+  return;
+}
 
   // WIN SCREEN → ENTER → START
   if (gameState === "win" && keyCode === ENTER) {
@@ -1627,10 +1683,12 @@ function drawSadEnding() {
 }
 
 function handleInput() {
-  // Allow movement during tutorial delay
-  if (tutorialActive && tutorialDelay <= 0) {
+  if (
+    tutorialActive &&
+    (enterInstructionActive || tutorialDelay <= 0)
+  ) {
     player.isMoving = false;
-    return;   // freeze ONLY when the card is visible
+    return;
   }
 
   if (stompAnimating) {
@@ -1988,6 +2046,21 @@ if (gameState === "start") {
       }
     }
 
+    if (
+  gameState === "tutorial" &&
+  (enterInstructionActive || tutorialIndex === 0)
+) {
+  return;
+}
+
+if (
+  gameState === "tutorial" &&
+  tutorialActive &&
+  (enterInstructionActive || tutorialIndex <= 3)
+) {
+  return;
+}
+
     // --- TUTORIAL BUTTON CLICK ---
   if (gameState === "tutorial" && tutorialActive) {
         let x = width/2 + 280;
@@ -2025,6 +2098,14 @@ if (gameState === "start") {
 
 function mouseReleased() {
   // --- START SCREEN BUTTON RELEASE ---
+  if (
+  gameState === "tutorial" &&
+  (enterInstructionActive || tutorialIndex === 0)
+) {
+  tutorialBtnPressed = false;
+  return;
+} 
+
   if (gameState === "start") {
   let hover = mouseX > START_BTN.x && mouseX < START_BTN.x + START_BTN.w &&
               mouseY > START_BTN.y && mouseY < START_BTN.y + START_BTN.h;
