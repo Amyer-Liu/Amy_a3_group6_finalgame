@@ -1290,12 +1290,10 @@ function drawDialogueCard(cardImage) {
 
   // Smaller dialogue-card size
   const cardW = min(620, width - 300);
-  const cardH =
-    cardW * (cardImage.height / cardImage.width);
+  const cardH = cardW * (cardImage.height / cardImage.width);
 
-  // Position near the bottom of the screen
-  const bottomMargin = -40;
-  const cardY = height - cardH / 2 - bottomMargin;
+  // Vertically centered
+  const cardY = height / 2;
 
   image(
     cardImage,
