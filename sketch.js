@@ -1087,10 +1087,12 @@ if (foundFishMessageActive) {
     const cardH =
       cardW * (foundPopupCard.height / foundPopupCard.width);
 
+    const cardY = 180;
+
     image(
       foundPopupCard,
       width / 2,
-      height / 2,
+      cardY,
       cardW,
       cardH
     );
