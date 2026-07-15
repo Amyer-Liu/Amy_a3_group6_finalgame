@@ -9,8 +9,12 @@ let startBg;
 let winBg;
 let lossBg;
 let bgImg;
+let transitionPage;
 let start_penguin;
 let levelPickerBg;
+
+let transitionStartTime = 0;
+const TRANSITION_DURATION = 3000; 
 
 // Level picker assets
 let currentLevel = 1;
@@ -341,6 +345,7 @@ function preload() {
   startBg = loadImage("assets/images/title_screen.png");
   winBg   = loadImage("assets/images/win_screen.png");
   lossBg  = loadImage("assets/images/loss_screen.png");
+  transitionPage = loadImage("assets/images/transition_page.png");
 
   levelPickerBg = loadImage("assets/images/level_picker.JPG");
   lock_icon = loadImage("assets/images/lock_icon.png");
@@ -845,6 +850,86 @@ function drawStartScreen() {
   }
 }
 
+function startLevelPickerTransition() {
+  transitionStartTime = millis();
+  gameState = "transition";
+  cursor(ARROW);
+}
+
+function drawSnowyLoadingBar(progress, x, y, w, h) {
+  push();
+  rectMode(CORNER);
+
+  // Outer icy frame
+  noStroke();
+  fill(18, 35, 70, 220);
+  rect(x, y, w, h, 18);
+
+  // Empty bar background
+  fill(210, 230, 255, 55);
+  rect(x + 8, y + 8, w - 16, h - 16, 12);
+
+  // Filled section
+  const innerW = (w - 16) * progress;
+
+  fill(120, 190, 255, 220);
+  rect(x + 8, y + 8, innerW, h - 16, 12);
+
+  // Ice highlight
+  fill(255, 255, 255, 70);
+  rect(x + 8, y + 8, innerW, (h - 16) * 0.35, 12);
+
+  // Snow along the top
+  fill(245, 250, 255);
+  for (let i = 0; i < 7; i++) {
+    const snowX = x + 18 + i * ((w - 36) / 6);
+    circle(snowX, y + 6, 16);
+  }
+
+  // Moving snowflake
+  let markerX = x + 8 + innerW;
+  markerX = constrain(markerX, x + 18, x + w - 18);
+
+  textAlign(CENTER, CENTER);
+  textSize(24);
+  fill(255);
+  text("❄", markerX, y + h / 2);
+
+  pop();
+}
+
+function drawTransitionScreen() {
+  imageMode(CORNER);
+
+  // Background image
+  image(transitionPage, 0, 0, width, height);
+
+  // Progress from 0 to 1
+  let elapsed = millis() - transitionStartTime;
+  let progress = constrain(elapsed / TRANSITION_DURATION, 0, 1);
+
+  // Bar position
+  let barW = 420;
+  let barH = 36;
+  let barX = width / 2 - barW / 2;
+  let barY = height / 2 + 80;
+
+  drawSnowyLoadingBar(progress, barX, barY, barW, barH);
+
+  // Optional percent text
+  push();
+  textFont(gameFont);
+  textAlign(CENTER, CENTER);
+  textSize(26);
+  fill(235, 245, 255);
+  text(floor(progress * 100) + "%", width / 2, barY + 70);
+  pop();
+
+  // When full, go to level picker
+  if (progress >= 1) {
+    gameState = "level_picker";
+  }
+}
 
 function draw() {
   // START SCREEN
@@ -864,6 +949,12 @@ function draw() {
     drawLossScreen();
     return;
   }
+
+  // WIN → LEVEL PICKER TRANSITION
+if (gameState === "transition") {
+  drawTransitionScreen();
+  return;
+}
 
   // LEVEL PICKER
   if (gameState === "level_picker") {
@@ -2149,9 +2240,13 @@ function mouseReleased() {
       mouseX > lpBx-lpBw/2 && mouseX < lpBx+lpBw/2 &&
       mouseY > lpBy-lpBh/2 && mouseY < lpBy+lpBh/2;
 
-    if (levelPickerBtnPressed && lpHover) {
-      gameState = "level_picker";
-    }
+ if (levelPickerBtnPressed && lpHover) {
+  if (gameState === "win" && currentLevel === 1) {
+    startLevelPickerTransition();
+  } else {
+    gameState = "level_picker";
+  }
+}
 
     let lossBx = width/2, lossBy = height*0.45, lossBw = 320, lossBh = 64;
     let lossHover =
