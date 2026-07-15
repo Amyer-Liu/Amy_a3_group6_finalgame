@@ -242,7 +242,9 @@ let spaceDialogueCard;
 let hurryCard;
 let instructionDirectionCard;
 let warningOutline;
+let popUpCard;
 let maskBuffer;
+let foundPopupCard;
 let avalancheBuffer;
 let boxKey;
 let tutorialSteps = [
@@ -296,7 +298,7 @@ let fishIconOutline;   // when NOT collected
 let fishIconFilled;    // when collected
 let needFishMessageActive = false;
 let needFishMessageTimer = 0;
-let needFishMessageDuration = 120; // 2 seconds at 60fps
+let needFishMessageDuration = 180; // 3 seconds at 60fps
 let foundFishMessageActive = false;
 let foundFishMessageTimer = 0;
 let foundFishMessageDuration = 240
@@ -349,6 +351,8 @@ function preload() {
   avalancheCard = loadImage("assets/images/avalanche_card.png");
   spaceDialogueCard = loadImage("assets/images/space_dialoguecard.png");
   info_box = loadImage("assets/images/level_info_box.png");
+  popUpCard = loadImage("assets/images/pop_up_card.png");
+  foundPopupCard = loadImage("assets/images/Foundpopup_card.png");
 
   // Fishy stuff
   fishImg = loadImage("assets/images/test_fish.png");
@@ -1041,51 +1045,63 @@ function draw() {
   }
 
   // --- NEED FISH POPUP MESSAGE ---
-  if (needFishMessageActive) {
-      needFishMessageTimer--;
-      push();
-      imageMode(CENTER);
+ if (needFishMessageActive) {
+  needFishMessageTimer--;
 
-      // same tutorial box image
-      image(tutorialBox, width/2, height/2, 730, 200);
+  push();
+  imageMode(CENTER);
 
-      // text
-      textAlign(CENTER, CENTER);
-      textFont(gameFont);
-      textSize(32);
-      stroke(10, 15, 54);
-      strokeWeight(8);
-      fill(247, 20, 43);
+  const cardW = min(730, width - 160);
+  const cardH =
+    cardW * (popUpCard.height / popUpCard.width);
 
-      text("You need to find Fishy first !", width/2, height/2);
-      pop();
+  const cardY = 180; // moves the popup closer to the timer
 
-      if (needFishMessageTimer <= 0) {
-        needFishMessageActive = false;
-      }
+  image(
+    popUpCard,
+    width / 2,
+    cardY,
+    cardW,
+    cardH
+  );
+
+  pop();
+
+  if (needFishMessageTimer <= 0) {
+    needFishMessageActive = false;
+  }
+}
+
+if (foundFishMessageActive) {
+  foundFishMessageTimer--;
+
+  push();
+  imageMode(CENTER);
+
+  if (
+    foundPopupCard &&
+    foundPopupCard.width > 0 &&
+    foundPopupCard.height > 0
+  ) {
+    const cardW = min(750, width - 180);
+    const cardH =
+      cardW * (foundPopupCard.height / foundPopupCard.width);
+
+    image(
+      foundPopupCard,
+      width / 2,
+      height / 2,
+      cardW,
+      cardH
+    );
   }
 
-  if (foundFishMessageActive) {
-    foundFishMessageTimer--;
+  pop();
 
-    push();
-    imageMode(CENTER);
-    image(tutorialBox, width/2, height/2, 750, 300);
-
-    textAlign(CENTER, CENTER);
-    textFont(gameFont);
-    textSize(28);
-    stroke(10, 15, 54);
-    strokeWeight(8);
-    fill(255);
-
-    text("You found Fishy!\nFishy tends to run away a lot...\nHurry to safety now!", width/2, height/2);
-    pop();
-
-    if (foundFishMessageTimer <= 0) {
-        foundFishMessageActive = false;
-    }
+  if (foundFishMessageTimer <= 0) {
+    foundFishMessageActive = false;
   }
+}
 }
 
 function animateUpTest() {
