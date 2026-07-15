@@ -238,6 +238,7 @@ let postTutorialDelayFrames = 360; // 6 seconds
 let tutorialBox;
 let avalancheCard;
 let flashlightCard;
+let spaceDialogueCard;
 let hurryCard;
 let instructionDirectionCard;
 let warningOutline;
@@ -346,6 +347,7 @@ function preload() {
   flashlightCard = loadImage("assets/images/flashlight_card.png");
   instructionDirectionCard = loadImage("assets/images/instruction_directioncard.png");
   avalancheCard = loadImage("assets/images/avalanche_card.png");
+  spaceDialogueCard = loadImage("assets/images/space_dialoguecard.png");
   info_box = loadImage("assets/images/level_info_box.png");
 
   // Fishy stuff
@@ -1268,6 +1270,12 @@ if (tutorialIndex === 3) {
   return;
 }
 
+// Space warning dialogue
+if (tutorialIndex === 4) {
+  drawDialogueCard(spaceDialogueCard);
+  return;
+}
+
   // Format timer
   let rawText = step.text;
   let minutes = floor(totalTime / 60);
@@ -1318,49 +1326,6 @@ if (tutorialIndex === 3) {
     image(avalancheImgMasked, width/2 - 335, height/2 - 80);
     image(warningOutline, width/2 - 330, height/2 - 80, 200, 200);
   } 
-
-  else if (tutorialIndex === 4) {
-    textAlign(LEFT, TOP);
-    textSize(step.size);
-    stroke(10, 15, 54);
-    strokeWeight(8);
-
-    // --- LEFT BOUND + Y POSITION CONTROL ---
-    let leftX = width/2 - 305;
-    let baseY = height/2 - 50; 
-    let lh = textAscent() + textDescent() + 10; // line height
-
-
-    // --- LINE 1 ---
-    fill(step.fill[0], step.fill[1], step.fill[2]);
-    text("Really can't see much... pressing space!", leftX, baseY);
-
-
-    // --- LINE 2 ---
-    text("But careful, vibrations makes the", leftX, baseY + lh - 15);
-
-
-    // --- LINE 3 (with red highlight) ---
-    let before    = "avalanche come ";
-    let highlight = "45 seconds";
-    let after     = " faster!";
-
-    let line3Y = baseY + lh * 2 -30;
-
-    // BEFORE
-    fill(step.fill[0], step.fill[1], step.fill[2]);
-    text(before, leftX, line3Y);
-
-    // RED HIGHLIGHT
-    let beforeW = textWidth(before);
-    fill(255, 0, 0);
-    text(highlight, leftX + beforeW, line3Y);
-
-    // AFTER
-    let highlightW = textWidth(highlight);
-    fill(step.fill[0], step.fill[1], step.fill[2]);
-    text(after, leftX + beforeW + highlightW, line3Y);
-  }
 
   else {
     textAlign(CENTER, CENTER);
@@ -2046,17 +2011,10 @@ if (gameState === "start") {
       }
     }
 
-    if (
-  gameState === "tutorial" &&
-  (enterInstructionActive || tutorialIndex === 0)
-) {
-  return;
-}
-
 if (
   gameState === "tutorial" &&
   tutorialActive &&
-  (enterInstructionActive || tutorialIndex <= 3)
+  (enterInstructionActive || tutorialIndex <= 4)
 ) {
   return;
 }
@@ -2100,11 +2058,12 @@ function mouseReleased() {
   // --- START SCREEN BUTTON RELEASE ---
   if (
   gameState === "tutorial" &&
-  (enterInstructionActive || tutorialIndex === 0)
+  tutorialActive &&
+  (enterInstructionActive || tutorialIndex <= 4)
 ) {
   tutorialBtnPressed = false;
   return;
-} 
+}
 
   if (gameState === "start") {
   let hover = mouseX > START_BTN.x && mouseX < START_BTN.x + START_BTN.w &&
