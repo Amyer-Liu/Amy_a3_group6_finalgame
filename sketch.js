@@ -2240,8 +2240,13 @@ function mouseReleased() {
       mouseX > lpBx-lpBw/2 && mouseX < lpBx+lpBw/2 &&
       mouseY > lpBy-lpBh/2 && mouseY < lpBy+lpBh/2;
 
- if (levelPickerBtnPressed && lpHover) {
-  if (gameState === "win" && currentLevel === 1) {
+if (levelPickerBtnPressed && lpHover) {
+  // Show loading transition after winning Level 1
+  // or when leaving the Lost screen
+  if (
+    (gameState === "win" && currentLevel === 1) ||
+    gameState === "loss"
+  ) {
     startLevelPickerTransition();
   } else {
     gameState = "level_picker";
